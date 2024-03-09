@@ -1,0 +1,51 @@
+<div>
+  <button id="starButton" (click)="toggleRTC()" style="width:80px; height:50px;">{{ rtcStarted ? 'Stop' :
+    'Start'}}</button>
+  <input type="checkbox" id="useStun" [formControl]="useStun" />
+  <label for="useStun">Use STUN server</label>
+</div>
+<div>
+  <label for="message">Message:</label>
+  <input type="text" id="message" [formControl]="message" />
+  <button id="sendButton" (click)="sendMsg()">Send</button>
+</div>
+
+<div>
+  <h2>Media</h2>
+  <audio id="audio" autoplay="true" [srcObject]="audioStream"></audio>
+  <video id="video" autoplay="true" playsinline="true" width="640px" height="480px" [srcObject]="videoStream"></video>
+</div>
+
+<div>
+  <h2>GamePad</h2>
+  <ul>
+    <li>X Axis: {{xAxis | async}}</li>
+    <li>Y Axis: {{yAxis | async}}</li>
+    <li>Light: {{lightOn | async}}</li>
+    <li>X Speed: {{xSpeed | async}}</li>
+    <li>Y Speed: {{ySpeed | async}}</li>
+    <li>Speed: {{speed | async}}</li>
+  </ul>
+</div>
+
+<div>
+  <ul>
+    @for(m of messages; track m) {
+    <li>{{ m }}</li>
+    } @empty {
+    <li> There are no messages. </li>
+    }
+  </ul>
+</div>
+
+
+<div>
+  <h2>Offer</h2>
+  <pre>{{offer}}</pre>
+</div>
+<div>
+  <h2>Answer</h2>
+  <pre>{{answer}}</pre>
+</div>
+
+<router-outlet />
