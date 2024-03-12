@@ -7,8 +7,8 @@ import { Observable, Subject, fromEvent } from 'rxjs';
 export class RtcService {
 
 
-  private videoStream$ = new Subject<MediaStream | null>();
-  private audioStream$ = new Subject<MediaStream | null>();
+  private videoStream$ = new Subject<MediaStream>();
+  private audioStream$ = new Subject<MediaStream>();
   public videoStream = this.videoStream$.asObservable();
   public audioStream = this.audioStream$.asObservable();
 
@@ -23,6 +23,9 @@ export class RtcService {
   public offerSdp = this.offerSdp$.asObservable();
   public answerSdp = this.answerSdp$.asObservable();
 
+  private connectionState$ = new Subject<string>();
+  public connectionState = this.connectionState$.asObservable();
+
   constructor() { }
 
   public async start(useStun: boolean | null = false) {
@@ -34,6 +37,11 @@ export class RtcService {
     }
 
     this.pc = new RTCPeerConnection(config);
+
+    this.connectionState$.next(this.pc.connectionState);
+    this.pc.onconnectionstatechange = ev => {
+      this.connectionState$.next(this.pc!.connectionState);
+    }
     
     this.channel = this.pc.createDataChannel('command');
     this.channel.onopen = ev => {
@@ -52,9 +60,9 @@ export class RtcService {
 
     this.pc.addEventListener('track', event => {
       if (event.track.kind == 'video') {
-        this.videoStream$.next(event.streams[0]);
+        this.videoStream$.next(new MediaStream([event.track]));
       } else {
-        this.audioStream$.next(event.streams[0]);
+        this.audioStream$.next(new MediaStream([event.track]));
       }
     });
 
@@ -65,6 +73,7 @@ export class RtcService {
     }
 
     this.pc.addTransceiver('video', { direction: 'recvonly' });
+    this.pc.addTransceiver('video', {direction: 'recvonly'});
     this.pc.addTransceiver('audio', { direction: 'sendrecv' });
 
     let offer = await this.pc.createOffer();
@@ -99,11 +108,10 @@ export class RtcService {
     if (this.pc != null) {
       this.channel?.close();
       this.pc.close();
-      this.videoStream$.next(null);
-      this.audioStream$.next(null);
       this.pc = null;
       this.offerSdp$.next('');
       this.answerSdp$.next('');
+      this.connectionState$.next('');
     }
     if (this.localStream != null) {
       this.localStream.getTracks().forEach(track => {

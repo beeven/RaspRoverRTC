@@ -9,11 +9,18 @@
   <input type="text" id="message" [formControl]="message" />
   <button id="sendButton" (click)="sendMsg()">Send</button>
 </div>
+<div>
+  <span>conneciton state: {{connectionState}}</span>
+</div>
 
 <div>
   <h2>Media</h2>
-  <audio id="audio" autoplay="true" [srcObject]="audioStream"></audio>
-  <video id="video" autoplay="true" playsinline="true" width="640px" height="480px" [srcObject]="videoStream"></video>
+  @for (audioStream of audioStreams; track audioStream.id) {
+    <audio id="audio" autoplay="true" [srcObject]="audioStream"></audio>
+  }
+  @for (videoStream of videoStreams; track videoStream.id) {
+    <video id="video" autoplay="true" playsinline="true" width="640px" height="480px" [srcObject]="videoStream"></video>
+  }
 </div>
 
 <div>
@@ -25,6 +32,9 @@
     <li>X Speed: {{xSpeed | async}}</li>
     <li>Y Speed: {{ySpeed | async}}</li>
     <li>Speed: {{speed | async}}</li>
+    <li>L Trigger: {{lTrigger | async}}</li>
+    <li>R Trigger: {{rTrigger | async}}</li>
+    <li>L X Axis: {{lXAxis | async}}</li>
   </ul>
 </div>
 

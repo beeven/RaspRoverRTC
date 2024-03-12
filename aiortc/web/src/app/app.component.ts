@@ -25,11 +25,16 @@ export class AppComponent implements OnInit {
   ySpeed: Observable<number>;
   speed: Observable<number>;
 
+  lTrigger: Observable<number>;
+  rTrigger: Observable<number>;
+  lXAxis: Observable<number>;
+
   rtcStarted = false;
-  videoStream: MediaStream | null = null;
-  audioStream: MediaStream | null = null;
+  videoStreams: MediaStream[] = [];
+  audioStreams: MediaStream[] = [];
   offer: string | undefined;
   answer: string | undefined;
+  connectionState: string = '';
 
   message = new FormControl('');
 
@@ -41,10 +46,15 @@ export class AppComponent implements OnInit {
     this.ySpeed = gamepadService.ySpeed;
     this.speed = gamepadService.speed;
 
-    this.rtcService.audioStream.subscribe(stream => { this.audioStream = stream; });
-    this.rtcService.videoStream.subscribe(stream =>{ this.videoStream = stream; });
+    this.lXAxis = gamepadService.lXAxis;
+    this.lTrigger = gamepadService.lTrigger;
+    this.rTrigger = gamepadService.rTrigger;
+
+    this.rtcService.audioStream.subscribe(stream => { this.audioStreams.push(stream); });
+    this.rtcService.videoStream.subscribe(stream =>{ this.videoStreams.push(stream); });
     this.rtcService.offerSdp.subscribe(content =>{ this.offer = content;});
     this.rtcService.answerSdp.subscribe(content => {this.answer = content;});
+    this.rtcService.connectionState.subscribe(state => {this.connectionState = state});
   }
   ngOnInit(): void {
     // this.ptzService.getMessages().subscribe((message: string)=>{
@@ -64,10 +74,12 @@ export class AppComponent implements OnInit {
   async toggleRTC() {
     if (this.rtcStarted) {
       await this.rtcService.stop();
+      this.videoStreams = [];
+      this.audioStreams = [];
       this.rtcStarted = false;
     } else {
-      await this.rtcService.start(this.useStun.value);
       this.rtcStarted = true;
+      await this.rtcService.start(this.useStun.value);
     }
   }
 

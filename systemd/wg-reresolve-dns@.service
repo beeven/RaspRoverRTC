@@ -1,0 +1,6 @@
+[Unit]
+Description=wg-reresolve-dns@
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/doc/wireguard-tools/examples/reresolve-dns/reresolve-dns.sh %i

@@ -5,6 +5,7 @@ import threading
 
 import serial
 import yaml
+import yaml
 
 curpath = os.path.realpath(__file__)
 thisPath = os.path.dirname(curpath)
@@ -117,21 +118,3 @@ class BaseController:
 
     def gimbal_dev_close(self):
         self.ser.close()
-
-
-if __name__ == "__main__":
-    import time
-
-    gimbal = BaseController("/dev/ttyAMA0", 115200)
-    # gimbal.gimbal_lights_ctrl(255, 0)
-
-    while True:
-        try:
-            gimbal.gimbal_ctrl(-90, 0, 100, 255)
-            time.sleep(2)
-            gimbal.gimbal_ctrl(90, 60, 100, 255)
-            time.sleep(2)
-        except KeyboardInterrupt:
-            break
-
-    gimbal.gimbal_dev_close()

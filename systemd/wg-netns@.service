@@ -1,0 +1,25 @@
+[Unit]
+Description=Attach eth1 to Named network namespace %i
+Requires=netns@%i.service
+After=netns@%i.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStart=/usr/sbin/ip link set netns %i eth1
+ExecStart=/usr/sbin/ip -n %i link set up dev eth1
+ExecStart=/usr/sbin/ip -n %i addr add 192.168.0.100/24 dev eth1
+ExecStart=/usr/sbin/ip -n %i route add default via 192.168.0.1 dev eth1
+ExecStart=/usr/sbin/ip -n %i link add wg0 type wireguard
+ExecStart=/usr/sbin/ip -n %i link set wg0 netns 1
+ExecStart=/usr/bin/wg setconf wg0 /etc/wireguard/wg0.conf
+ExecStart=/usr/sbin/ip addr add 10.1.3.58/24 dev wg0
+ExecStart=/usr/sbin/ip link set up dev wg0
+
+
+ExecStop=/usr/sbin/ip -n %i link set down dev eth1
+ExecStop=/usr/sbin/ip link delete wg0
+
+[Install]
+WantedBy=multi-user.target
